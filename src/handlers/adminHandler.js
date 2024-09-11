@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const Admin = require('../models/Admin');
 const AuditLog = require('../models/AuditLog');
+const { Op } = require('sequelize');
 
 
 const disableUserByEmail = async (req, res) => {
@@ -57,7 +58,52 @@ const enableUserByEmail = async (req, res) => {
     }
 };
 
+const seeDisabledUsers = async (req, res) => {
+    try {
+        const users = await User.findAll({
+            where: {
+                deleted_at: {
+                    [Op.ne]: null
+                }
+            },
+            attributes: {exclude: ['password']}
+        });
+
+        if (users.length === 0) {
+            return res.status(404).json({message: 'No disabled users found'});
+        };
+
+
+        return res.status(200).json(users);
+    } catch (error) {
+        return res.status(500).json({message: `Internal server error: ${error}`});
+    }
+};
+
+const seeActiveUsers = async(req, res) => {
+    try {
+
+        const users = await User.findAll({
+            where: {
+                deleted_at: null
+            },
+            attributes: {exclude: ['password']}
+        })
+
+        if (users.length === 0) {
+            return res.status(404).json({message: 'No active users found'});
+        };
+
+        return res.status(200).json(users);
+        
+    } catch (error) {
+        return res.status(500).json({message: `Internal server error: ${error}`});
+    }
+}
+
 module.exports = {
     disableUserByEmail,
-    enableUserByEmail
+    enableUserByEmail,
+    seeDisabledUsers,
+    seeActiveUsers
 };
