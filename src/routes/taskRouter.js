@@ -8,16 +8,16 @@ const {
     wipeDeletedTasks
 } = require('../handlers/taskHandler');
 
-const isUserAuthenticated = require('../middlewares/isUserAuthenticated');
+const isAuthenticated = require('../middlewares/isAuthenticated');
 const isUserActive = require('../middlewares/isUserActive');
 
 taskRouter
-    .post('/create', isUserAuthenticated, isUserActive, createTask)
-    .put('/update/:id', isUserAuthenticated, isUserActive, updateTaskById)
-    .get('/all', isUserAuthenticated, isUserActive, getTasks)
-    .delete('/delete/:id', isUserAuthenticated, isUserActive, deleteTaskById)
-    .get('/deleted', isUserAuthenticated, isUserActive, seeDeletedTasks)
-    .delete('/wipe', isUserAuthenticated, isUserActive, wipeDeletedTasks);
+    .post('/create', isAuthenticated, isUserActive, createTask)
+    .put('/update/:id', isAuthenticated, isUserActive, updateTaskById)
+    .get('/all', isAuthenticated, isUserActive, getTasks)
+    .delete('/delete/:id', isAuthenticated, isUserActive, deleteTaskById)
+    .get('/deleted', isAuthenticated, isUserActive, seeDeletedTasks)
+    .delete('/wipe', isAuthenticated, isUserActive, wipeDeletedTasks);
 
 module.exports = taskRouter;
 

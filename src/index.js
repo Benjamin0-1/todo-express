@@ -5,6 +5,8 @@ const port = 3001 || process.env.PORT;
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const loadDb = require('./utils/loadDb');
+const indexRouter = require('./routes/index');
+const sequelize = require('./db');
 
 app.use(cors(
     {
@@ -14,10 +16,14 @@ app.use(cors(
 
 app.use(bodyParser.json());
 
+app.use('/api', indexRouter);
 
-app.listen(port, async () => {
-    await loadDb(); 
-    console.log(`Server is running on port ${port}`);
+
+sequelize.sync({force: true}).then(async () => {
+    await loadDb()
+    app.listen(port, () => {
+        console.log(`Server is running on port ${port}`);
+    });
 });
 
 

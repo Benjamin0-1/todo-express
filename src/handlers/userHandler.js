@@ -27,15 +27,21 @@ const login = async (req, res) => {
             return res.status(400).json({message: 'Invalid credentials'});
         };
 
+        await LoginHistory.create({
+            userId: user.id,
+            ipAddress: req.ip,
+            userAgent: req.headers['user-agent'],
+            email: user.email
+        });
 
-        const accessToken = jwt.sign({email: user.email}, ACCESS_SECRET, {expiresIn: '1h'});
-        const refreshToken = jwt.sign({email: user.email}, REFRESH_SECRET, {expiresIn: '7d'});
 
-        await LoginHistory.create({userId: user.id});
+        const accessToken = jwt.sign({email: user.email, id: user.id}, ACCESS_SECRET, {expiresIn: '1h'});
+        const refreshToken = jwt.sign({email: user.email, id: user.id}, REFRESH_SECRET, {expiresIn: '7d'});
+
         return res.status(200).json({accessToken, refreshToken});
 
     } catch (error) {
-        return res.status(500).json({message: 'Internal server error'});
+        return res.status(500).json({message: `Internal server error: ${error}`});
         
     }
 };
@@ -43,9 +49,19 @@ const login = async (req, res) => {
 const signup = async (req, res) => {
     const {firstName, lastName, email, password} = req.body;
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
     if (!firstName || !lastName || !email || !password) {
         return res.status(400).json({message: 'Please fill all fields'});
-    }
+    };
+
+    if (!emailRegex.test(email)) {
+        return res.status(400).json({message: 'Invalid email address'});
+    };
+
+    if (password.length < 5) {
+        return res.status(400).json({message: 'Password must be at least 5 characters'});
+    };
 
     try {
         
@@ -106,10 +122,32 @@ const viewProfile = async (req, res) => {
     }
 };
 
+const seeLoginHistory = async (req, res) => {
+    const userId = req.user.id;
+
+    try {
+        
+        const loginHistory = await LoginHistory.findAll({
+            where: {userId},
+            order: [['createdAt', 'DESC']]
+        });
+
+        if (loginHistory.length === 0) {
+            return res.status(404).json({message: 'No login history found'});
+        }
+
+        return res.status(200).json(loginHistory);
+
+    } catch (error) {
+        return res.status(500).json({message: 'Internal server error'});
+    }
+};
+
 
 module.exports = {
     login,
     signup,
     refreshAccessToken,
-    viewProfile
+    viewProfile,
+    seeLoginHistory
 };
