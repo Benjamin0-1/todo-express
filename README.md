@@ -45,19 +45,59 @@ TodoExpress is a web application that allows users to manage their tasks efficie
     ```
 
     The application will be accessible at `http://localhost:3001` by default.
+Endpoints
+Task Router
+POST /api/tasks/create
+Creates a new task. Requires authentication and an active user status.
 
-## Usage
+PUT /api/tasks/update/
 
-1. Open your preferred web browser and navigate to `http://localhost:3000`.
+Updates an existing task by its ID. Requires authentication and an active user status.
 
-2. Sign up for a new account or log in with your existing credentials.
+GET /api/tasks/all
+Retrieves all tasks. Requires authentication and an active user status.
 
-3. Start managing your tasks, create new ones, and enjoy the productivity boost!
+DELETE /api/tasks/delete/
 
-## Contributing
+Deletes a task by its ID. Requires authentication and an active user status.
 
-Contributions are welcome! If you have any ideas, suggestions, or bug reports, please open an issue or submit a pull request.
+GET /api/tasks/deleted
+Retrieves all soft-deleted tasks. Requires authentication and an active user status.
 
-## License
+DELETE /api/tasks/wipe
+Permanently deletes all soft-deleted tasks. Requires authentication and an active user status.
 
-This project is licensed under the [MIT License](LICENSE).
+User Router
+POST /api/users/login
+Authenticates a user and provides access and refresh tokens. Includes rate limiting.
+
+POST /api/users/signup
+Registers a new user.
+
+POST /api/users/refresh
+Refreshes the access token using a valid refresh token.
+
+GET /api/users/profile
+Retrieves the authenticated user's profile information. Requires authentication and an active user status.
+
+GET /api/users/login-history
+Retrieves the login history of the authenticated user. Requires authentication and an active user status.
+
+GET /api/users/activity-history
+Retrieves the activity history of the authenticated user. Requires authentication and an active user status.
+
+Admin Router
+POST /api/admin/disable
+Disables a user account by email. Requires admin privileges and authentication.
+
+POST /api/admin/enable
+Enables a user account by email. Requires admin privileges and authentication.
+
+GET /api/admin/disabled
+Retrieves all disabled user accounts. Requires admin privileges and authentication.
+
+GET /api/admin/active
+Retrieves all active user accounts. Requires admin privileges and authentication.
+
+POST /api/admin/grant-admin
+Grants admin privileges to a user by email. Requires admin privileges and authentication.
