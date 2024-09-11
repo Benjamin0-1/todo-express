@@ -99,11 +99,43 @@ const seeActiveUsers = async(req, res) => {
     } catch (error) {
         return res.status(500).json({message: `Internal server error: ${error}`});
     }
-}
+};
+
+const grantAdminPrivileges = async (req, res) => {
+    const email = req.body.email;
+    if (!email) {
+        return res.status(400).json({message: 'Missing required information'});
+    };
+
+    try {
+        
+        const user = await User.findOne({where: {email}});
+        if (!user) {
+            return res.status(404).json({message: 'User not found'});
+        };
+
+        const admin = await Admin.findOne({where: {userId: user.id}});
+
+        if (admin) {
+            return res.status(400).json({message: 'User is already an admin'});
+        };
+
+        await Admin.create({userId: user.id});
+
+        await AuditLog.create({action: `Admin privileges granted to ${email}`, userId: user.id, ipAddress: req.ip});
+
+        return res.status(200).json({message: `Admin privileges granted to ${email}`});
+
+    } catch (error) {
+        return res.status(500).json({message: `Internal server error: ${error}`});
+        
+    }
+};
 
 module.exports = {
     disableUserByEmail,
     enableUserByEmail,
     seeDisabledUsers,
-    seeActiveUsers
+    seeActiveUsers,
+    grantAdminPrivileges
 };
