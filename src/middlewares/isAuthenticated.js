@@ -6,21 +6,28 @@ const ACCESS_SECRET = process.env.ACCESS_SECRET || 'access-secret';
 
 
 const isAuthenticated = async (req, res, next) => {
-    const accessToken = req.headers['authorization'];
-    if (!accessToken) {
-        return res.status(401).json({message: 'Unauthorized'});
-    };
+    // Extract the token from the Authorization header
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1]; // Get the token part from "Bearer <token>"
+
+    if (!token) {
+        return res.status(401).json({ message: 'Unauthorized, no token provided' });
+    }
 
     try {
-        const decoded = jwt.verify(accessToken, process.env.ACCESS_SECRET);
-        const user = await User.findOne({where: {email: decoded.email}});
+
+        const decoded = jwt.verify(token, ACCESS_SECRET);
+        const user = await User.findOne({ where: { email: decoded.email } });
+
         if (!user) {
-            return res.status(401).json({message: 'Unauthorized'});
-        };
+            return res.status(401).json({ message: 'Unauthorized, user not found' });
+        }
+
         req.user = user;
         next();
     } catch (error) {
-        return res.status(401).json({message: 'Unauthorized'});
+        console.error('Token verification error:', error);
+        return res.status(401).json({ message: 'Unauthorized, error verifying token' });
     }
 };
 

@@ -16,7 +16,7 @@ const disableUserByEmail = async (req, res) => {
             return res.status(400).json({message: 'User already deactivated'});
         }
 
-        const isUserAdmin = await Admin.findOne({where: {user_id: user.id}});
+        const isUserAdmin = await Admin.findOne({where: {userId: user.id}});
         if (isUserAdmin) {
             return res.status(403).json({message: 'You cannot deactivate an admin'});
         };
@@ -28,7 +28,7 @@ const disableUserByEmail = async (req, res) => {
         return res.status(200).json({message: 'User deactivated'});
 
     } catch (error) {
-        return res.status(500).json({message: 'Internal server error'});
+        return res.status(500).json({message:  `Internal server error: ${error}`});
     }
 };
 
@@ -46,11 +46,11 @@ const enableUserByEmail = async (req, res) => {
             return res.status(400).json({message: 'User already activated'});
         };
 
-        await User.update({deleted_at: Date.now()}, {where: {email}});
+        await User.update({deleted_at: null}, {where: {email}});
 
         await AuditLog.create({action: `User enabled :${email}`, userId: user.id, ipAddress: req.ip});
 
-        return res.status(200).json({message: 'User activated'});
+        return res.status(200).json({message: `User ${email} enabled`});
 
     } catch (error) {
         return res.status(500).json({message: 'Internal server error'});

@@ -24,12 +24,12 @@ const createTask = async (req, res) => {
 
         await Task.create({tittle, description, userId});
 
-        await AuditLog.create({action: 'Task created', userId});
+        await AuditLog.create({action: 'Task created', userId, ipAddress: req.ip});
 
         return res.status(201).json({message: 'Task created'});
 
     } catch (error) {
-        return res.status(500).json({message: 'Internal server error'});
+        return res.status(500).json({message: `Internal server error: ${error}`});
     }
 };
 
@@ -50,6 +50,10 @@ const updateTaskById = async (req, res) => {
         };
 
         const updatedFields = {};
+        if (task.tittle === tittle) {
+            return res.status(400).json({message: 'Task already exists with this tittle'});
+        };
+
         if (tittle) {
             updatedFields.tittle = tittle;
         }
@@ -64,7 +68,7 @@ const updateTaskById = async (req, res) => {
         return res.status(200).json({message: 'Task updated'});
 
     } catch (error) {
-        return res.status(500).json({message: 'Internal server error'});
+        return res.status(500).json({message: `Internal server error: ${error}`});
     }
 };
 
@@ -81,7 +85,7 @@ const getTasks = async (req, res) => {
         return res.status(200).json({tasks});
 
     } catch (error) {
-        return res.status(500).json({message: 'Internal server error'});
+        return res.status(500).json({message: `Internal server error: ${error}`});
     }
 };
 
@@ -104,12 +108,12 @@ const deleteTaskById = async (req, res) => {
 
         await Task.destroy({where: {id, userId}});
 
-        await AuditLog.create({action: 'Task deleted', userId});
+        await AuditLog.create({action: 'Task deleted', userId, ipAddress: req.ip});
 
         return res.status(200).json({message: 'Task deleted'});
 
     } catch (error) {
-        return res.status(500).json({message: 'Internal server error'});
+        return res.status(500).json({message: `Internal server error: ${error}`});
     }
 };
 
@@ -126,7 +130,7 @@ const seeDeletedTasks = async (req, res) => {
         return res.status(200).json({deletedTasks});
 
     } catch (error) {
-     return res.status(500).json({message: 'Internal server error'});   
+     return res.status(500).json({message: `Internal server error: ${error}`});   
     }
 };
 
@@ -142,11 +146,11 @@ const wipeDeletedTasks = async (req, res) => {
 
         await DeletedTask.destroy({where: {userId}});
 
-        await AuditLog.create({action: 'Deleted tasks wiped', userId});
+        await AuditLog.create({action: 'Deleted tasks wiped', userId, ipAddress: req.ip});
         return res.status(200).json({message: 'Deleted tasks wiped'});
 
     } catch (error) {
-        return res.status(500).json({message: 'Internal server error'});
+        return res.status(500).json({message: `Internal server error: ${error}`});
         
     }
 };

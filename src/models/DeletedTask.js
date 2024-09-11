@@ -13,15 +13,15 @@ const DeletedTask = sequelize.define('DeletedTask', {
         allowNull: false
     },
 
-    isCompleted: {
-        type: DataTypes.BOOLEAN,
-        allowNull: false
-    },
-
     createdAt: {
         type: DataTypes.DATE,
         defailtValue: DataTypes.NOW
     },
+
+    userId: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    }
 });
 
 module.exports = DeletedTask;

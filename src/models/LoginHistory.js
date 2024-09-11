@@ -23,6 +23,10 @@ const LoginHistory = sequelize.define('LoginHistory', {
     userAgent: {
         type: DataTypes.STRING,
         allowNull: false
+    },
+    userId: {
+        type: DataTypes.INTEGER,
+        allowNull: false
     }
 });
 

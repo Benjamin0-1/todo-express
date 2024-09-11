@@ -1,8 +1,9 @@
 const User = require('../models/User');
 const LoginHistory = require('../models/LoginHistory');
+const AuditLog = require('../models/AuditLog');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const { Op } = require('sequelize')
+const { Op, where } = require('sequelize')
 require('dotenv').config();
 
 const ACCESS_SECRET = process.env.ACCESS_SECRET || 'access-secret';
@@ -100,7 +101,7 @@ const refreshAccessToken = async (req, res) => {
         return res.status(200).json({accessToken});
 
     } catch (error) {
-        return res.status(401).json({message: 'Invalid refresh token'});
+        return res.status(401).json({message: `Unauthorized: ${error}`});
     }
 };
 
@@ -118,7 +119,7 @@ const viewProfile = async (req, res) => {
 
 
     } catch (error) {
-        return res.status(500).json({message: 'Internal server error'});
+        return res.status(500).json({message: `Internal server error: ${error}`});
     }
 };
 
@@ -139,15 +140,36 @@ const seeLoginHistory = async (req, res) => {
         return res.status(200).json(loginHistory);
 
     } catch (error) {
-        return res.status(500).json({message: 'Internal server error'});
+        return res.status(500).json({message: `Internal server error: ${error}`});
     }
 };
 
+const activityHistory = async(req, res) => {
+    const userId = req.user.id;
+
+    try {
+        
+        const activityHistory = await AuditLog.findAll({
+            where: {userId},
+            order: [['createdAt', 'DESC']]
+        });
+
+        if (activityHistory.length === 0) {
+            return res.status(404).json({message: 'No activity history found'});
+        }
+
+        return res.status(200).json(activityHistory);
+
+    } catch (error) {
+        return res.status(500).json({message: `Internal server error: ${error}`});
+    }
+}
 
 module.exports = {
     login,
     signup,
     refreshAccessToken,
     viewProfile,
-    seeLoginHistory
+    seeLoginHistory,
+    activityHistory
 };

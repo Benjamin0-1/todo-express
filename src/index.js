@@ -19,7 +19,7 @@ app.use(bodyParser.json());
 app.use('/api', indexRouter);
 
 
-sequelize.sync({force: true}).then(async () => {
+sequelize.sync({force: false}).then(async () => {
     await loadDb()
     app.listen(port, () => {
         console.log(`Server is running on port ${port}`);
